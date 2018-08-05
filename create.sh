@@ -153,18 +153,18 @@ EOF
 printf '[ok]\n'
 
 printf 'creating create-file.sh script... '
-cat - > "$wdir/create-file.sh" <<EOF
+cat - <<EOF > "$wdir/create-file.sh"
 #!/usr/bin/env bash
 
-file="$1"
-dir=$(dirname "$0")
+file="\$1"
+dir=\$(dirname "\$0")
 
-relpath=$(echo "$file" | sed 's+$dir++g')
-modname=$(echo "$relpath" | sed 's+/+.+g')
+relpath=\$(echo "\$file" | sed 's+\$dir++g')
+modname=\$(echo "\$relpath" | sed 's+/+.+g' | sed 's+\.py++g')
 
-cat - <<EOM > "$file"
+cat - <<EOM > "\$file"
 """
-$modname
+\$modname
 
 Description...
 
