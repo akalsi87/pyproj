@@ -125,6 +125,25 @@ EOF
 
 printf '[ok]\n'
 
+
+printf 'creating test/test_import.py... '
+cat - > "$wdir/test/test_import.py" <<EOF
+# test_import.py
+
+import unittest
+
+class TestCase(unittest.TestCase):
+    def test_import(self):
+        """Verify the package imports correctly."""
+        pkg = __import__('$proj')
+        self.assertIsNotNone(pkg)
+
+
+EOF
+
+printf '[ok]\n'
+
+
 printf 'creating LICENSE.txt for an MIT license... '
 cat - > "$wdir/LICENSE.txt" <<EOF
 MIT License
@@ -185,7 +204,19 @@ import typing
 EOM
 EOF
 
-chmod u+x "$wdir/create-file.sh"
+printf 'creating test.sh script... '
+cat - <<EOF > "$wdir/test.sh"
+#!/usr/bin/env bash
+
+file="\$1"
+dir=\$(dirname "\$0")
+
+cd "\$dir"
+python3.6 -m unittest
+
+EOF
+
+chmod u+x "$wdir/test.sh"
 printf '[ok]\n'
 
 printf 'creating format.sh file... '
