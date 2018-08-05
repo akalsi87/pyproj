@@ -1,6 +1,6 @@
 # pyproj
 
-Creates template Python 3 projects with `yapf` and `mypy`.
+Creates template Python 3.6 projects with `yapf` and `mypy`.
 
 ## Other features
  * initialized project with simeple docstrings and readme
