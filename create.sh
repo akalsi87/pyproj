@@ -204,6 +204,8 @@ import typing
 EOM
 EOF
 
+chmod u+x "$wdir/create-file.sh"
+
 printf 'creating test.sh script... '
 cat - <<EOF > "$wdir/test.sh"
 #!/usr/bin/env bash
