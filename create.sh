@@ -214,7 +214,7 @@ file="\$1"
 dir=\$(dirname "\$0")
 
 cd "\$dir"
-python3.6 -m unittest
+python3 -m unittest
 
 EOF
 
@@ -231,7 +231,7 @@ dir=$(dirname "$0")
 cd "$dir"
 
 printf 'running yapf... '
-python3.6 -m yapf -ir .
+python3 -m yapf -ir .
 printf '[ok]\n'
 
 printf 'running mypy...\n'
@@ -245,7 +245,7 @@ printf '[ok]\n'
 
 
 printf 'updating README... '
-python3.6 -c 'import $proj; help($proj)' > README
+python3 -c 'import $proj; help($proj)' > README
 printf '[ok]\n'
 
 EOF
