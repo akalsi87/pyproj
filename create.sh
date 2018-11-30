@@ -101,7 +101,6 @@ Usage
 Examples here..
 
 """
-
 EOF
 
 printf '[ok]\n'
@@ -205,6 +204,7 @@ EOM
 EOF
 
 chmod u+x "$wdir/create-file.sh"
+printf '[ok]\n'
 
 printf 'creating test.sh script... '
 cat - <<EOF > "$wdir/test.sh"
@@ -221,22 +221,27 @@ EOF
 chmod u+x "$wdir/test.sh"
 printf '[ok]\n'
 
-printf 'creating format.sh file... '
-cat - > "$wdir/format.sh" <<EOF
+printf 'creating lint.py file... '
+cat - > "$wdir/lint.py" <<EOF
 #!/usr/bin/env bash
 
-file="$1"
-dir=$(dirname "$0")
+dir=\$(dirname "\$0")
+proj=\$(basename \$(pwd))
 
-cd "$dir"
+cd "\$dir"
 
-printf 'running yapf... '
-python3 -m yapf -ir .
+printf 'running yapf...\n'
+find "\$proj" -name '*.py' | xargs -n1 -I{} bash -c "echo \" -> yapf {}\" && python3 -m yapf -i {}"
+if [ "\$?" != "0" ];
+then
+    printf '[failed]\n'
+    exit 1
+fi
 printf '[ok]\n'
 
 printf 'running mypy...\n'
-find . -name '*.py' | xargs -n1 -I{} bash -c "echo {} && mypy {}"
-if [ "$?" != "0" ];
+find "\$proj" -name '*.py' | xargs -n1 -I{} bash -c "echo \" -> mypy {}\" && mypy {}"
+if [ "\$?" != "0" ];
 then
     printf '[failed]\n'
     exit 1
@@ -250,7 +255,7 @@ printf '[ok]\n'
 
 EOF
 
-chmod u+x "$wdir/format.sh"
+chmod u+x "$wdir/lint.py"
 printf '[ok]\n'
 
 if [ "$setup" = "1" ];
@@ -260,13 +265,19 @@ then
 # setup for $proj
 
 from distutils.core import setup
+from setuptools import find_packages
+
+packages = find_packages(where='.')
+packages.remove('test')
+
+print(f'Installing the following packages: {packages}')
 
 setup(
     name='$proj',
-    version='0.1dev',
-    packages=['$proj'],
+    version='0.1.dev0',
+    packages=packages,
     license='MIT',
-    long_description=''
+    long_description=open('README').read()
 )
 
 EOF
@@ -275,7 +286,7 @@ fi
 
 if [ "$usegit" = "1" ];
 then
-    printf 'intializing and adding git repo... '
+    printf 'intializing virtualenv and creating git repo... '
 cat - > "$wdir/.gitignore" <<EOF
 # gitignore for $proj
 
@@ -285,6 +296,11 @@ cat - > "$wdir/.gitignore" <<EOF
 MANIFEST
 dist/
 
+# virtualenv additions
+include/
+bin/
+lib/
+
 EOF
     cd "$wdir"
     git init . 2>&1 > /dev/null
@@ -293,7 +309,16 @@ EOF
         printf '[failed]\n'
         exit 1
     fi
-    ./format.sh
     git add .
-    printf '[ok]\n'
+    virtualenv . > /dev/null
+    source bin/activate
+    pip install mypy > /dev/null
+    pip install yapf > /dev/null
+    pip install setuptools > /dev/null
+    pip freeze > requirements.txt
+    git add requirements.txt
+    deactivate
+    ./lint.py
+    git add README
+    printf '[all-ok]\n'
 fi
