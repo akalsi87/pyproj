@@ -220,8 +220,8 @@ EOF
 chmod u+x "$wdir/run_tests.sh"
 printf '[ok]\n'
 
-printf 'creating lint.py file... '
-cat - > "$wdir/lint.py" <<EOF
+printf 'creating lint.sh file... '
+cat - > "$wdir/lint.sh" <<EOF
 #!/usr/bin/env bash
 
 dir=\$(dirname "\$0")
@@ -254,7 +254,7 @@ printf '[ok]\n'
 
 EOF
 
-chmod u+x "$wdir/lint.py"
+chmod u+x "$wdir/lint.sh"
 printf '[ok]\n'
 
 if [ "$setup" = "1" ];
@@ -316,7 +316,7 @@ EOF
     pip freeze > requirements.txt
     git add requirements.txt
     deactivate
-    ./lint.py
+    ./lint.sh
     git add README
     printf '[all-ok]\n'
 fi
