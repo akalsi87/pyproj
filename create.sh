@@ -77,6 +77,8 @@ then
     err "failed to make directory: $wdir/$proj"
 fi
 
+set -e
+
 printf 'creating package __init__.py... '
 cat - > "$wdir/$proj/__init__.py" <<EOF
 """
@@ -133,10 +135,7 @@ import unittest
 
 class TestCase(unittest.TestCase):
     def test_import(self):
-        """Verify the package imports correctly."""
-        pkg = __import__('$proj')
-        self.assertIsNotNone(pkg)
-
+        self.assertIsNotNone(__import__('$proj'))
 
 EOF
 
@@ -206,8 +205,8 @@ EOF
 chmod u+x "$wdir/create-file.sh"
 printf '[ok]\n'
 
-printf 'creating test.sh script... '
-cat - <<EOF > "$wdir/test.sh"
+printf 'creating run_tests.sh script... '
+cat - <<EOF > "$wdir/run_tests.sh"
 #!/usr/bin/env bash
 
 file="\$1"
@@ -218,7 +217,7 @@ python3 -m unittest
 
 EOF
 
-chmod u+x "$wdir/test.sh"
+chmod u+x "$wdir/run_tests.sh"
 printf '[ok]\n'
 
 printf 'creating lint.py file... '
@@ -276,9 +275,8 @@ setup(
     name='$proj',
     version='0.1.dev0',
     packages=packages,
-    license='MIT',
-    long_description=open('README').read()
-)
+    data_files=[('', ['LICENSE.txt'])],
+    long_description=open('README').read())
 
 EOF
     printf '[ok]\n'
