@@ -135,6 +135,7 @@ import unittest
 
 class TestCase(unittest.TestCase):
     def test_import(self):
+        """Verify package is importable."""
         self.assertIsNotNone(__import__('$proj'))
 
 EOF
