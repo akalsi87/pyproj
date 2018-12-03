@@ -213,7 +213,7 @@ file="\$1"
 dir=\$(dirname "\$0")
 
 cd "\$dir"
-python3 -m unittest
+python3 -m unittest --verbose
 
 EOF
 
