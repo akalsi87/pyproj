@@ -206,8 +206,8 @@ EOF
 chmod u+x "$wdir/create-file.sh"
 printf '[ok]\n'
 
-printf 'creating run_tests.sh script... '
-cat - <<EOF > "$wdir/run_tests.sh"
+printf 'creating run-tests.sh script... '
+cat - <<EOF > "$wdir/run-tests.sh"
 #!/usr/bin/env bash
 
 file="\$1"
@@ -218,7 +218,7 @@ python3 -m unittest --verbose
 
 EOF
 
-chmod u+x "$wdir/run_tests.sh"
+chmod u+x "$wdir/run-tests.sh"
 printf '[ok]\n'
 
 printf 'creating lint.sh file... '
