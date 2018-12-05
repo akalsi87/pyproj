@@ -13,6 +13,10 @@ trap "cleanup" INT TERM EXIT
 set -e
 
 ./create.sh -d $TDIR -s -g
-$TDIR/lint.sh
-$TDIR/run-tests.sh
+
+cd $TDIR
+./lint.sh
+./run-tests.sh
+cd ../
+
 rm -rf $TDIR

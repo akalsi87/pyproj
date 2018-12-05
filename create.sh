@@ -170,6 +170,19 @@ EOF
 
 printf '[ok]\n'
 
+printf 'creating .style.yapf file...'
+cat - <<EOF > "$wdir/.style.yapf"
+[style]
+based_on_style = pep8
+spaces_before_comment = 4
+split_before_logical_operator = False
+column_limit = 79
+allow_split_before_dict_value = False
+join_multiple_lines = False
+split_before_first_argument = False
+EOF
+printf '[ok]\n'
+
 printf 'creating create-file.sh script... '
 cat - <<EOF > "$wdir/create-file.sh"
 #!/usr/bin/env bash
@@ -230,7 +243,7 @@ proj=\$(basename \$(pwd))
 
 cd "\$dir"
 
-printf 'running yapf...\n'
+printf 'running yapf on source...\n'
 find "\$proj" -name '*.py' | xargs -n1 -I{} bash -c "echo \" -> yapf {}\" && python3 -m yapf -i {}"
 if [ "\$?" != "0" ];
 then
@@ -239,7 +252,16 @@ then
 fi
 printf '[ok]\n'
 
-printf 'running mypy...\n'
+printf 'running yapf on tests...\n'
+find "test" -name '*.py' | xargs -n1 -I{} bash -c "echo \" -> yapf {}\" && python3 -m yapf -i {}"
+if [ "\$?" != "0" ];
+then
+    printf '[failed]\n'
+    exit 1
+fi
+printf '[ok]\n'
+
+printf 'running mypy on source...\n'
 find "\$proj" -name '*.py' | xargs -n1 -I{} bash -c "echo \" -> mypy {}\" && mypy {}"
 if [ "\$?" != "0" ];
 then
@@ -316,8 +338,8 @@ EOF
     pip install setuptools > /dev/null
     pip freeze > requirements.txt
     git add requirements.txt
+    ./lint.sh 2>&1 > /dev/null
     deactivate
-    ./lint.sh
     git add README
     printf '[all-ok]\n'
 fi
