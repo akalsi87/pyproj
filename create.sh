@@ -144,7 +144,7 @@ printf '[ok]\n'
 
 
 printf 'creating LICENSE.txt for an MIT license... '
-cat - > "$wdir/LICENSE.txt" <<EOF
+cat - > "$wdir/$proj/LICENSE.txt" <<EOF
 MIT License
 
 Copyright (c) `date +%Y` `git config --global user.name`
@@ -168,6 +168,10 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 EOF
 
+printf '[ok]\n'
+
+printf 'creating py.typed file...'
+touch "$wdir/$proj/py.typed"
 printf '[ok]\n'
 
 printf 'creating .style.yapf file...'
@@ -297,8 +301,9 @@ print(f'Installing the following packages: {packages}')
 setup(
     name='$proj',
     version='0.1.dev0',
+    package_dir={'$proj': '$proj'},
+    package_data={'$proj': ['LICENSE.txt', 'py.typed']},
     packages=packages,
-    data_files=[('', ['LICENSE.txt'])],
     long_description=open('README').read())
 
 EOF
