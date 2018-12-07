@@ -9,11 +9,11 @@ show_help() {
     cat - > /dev/stdout <<EOF
 create.sh -d|--dir <dir> [-s|--use-setup] [-g|--git]
 
-Create a skelton Python 3 project
+Create a skeleton Python 3 project with static typing support
 
 OPTIONS
   -d|--dir        Specify directory to set up project in
-  -s|--use-setup  Create a setup.py file
+  -s|--setup      Create a setup.py file
   -g|--git        Set up a git repository
   -h|--help       Show this message
 
@@ -35,7 +35,7 @@ parse_args() {
                 shift
                 shift
                 ;;
-            -s|--use-setup)
+            -s|--setup)
                 setup="1"
                 shift
                 ;;
@@ -177,13 +177,13 @@ printf '[ok]\n'
 printf 'creating .style.yapf file...'
 cat - <<EOF > "$wdir/.style.yapf"
 [style]
-based_on_style = pep8
-spaces_before_comment = 4
-split_before_logical_operator = False
-column_limit = 79
-allow_split_before_dict_value = False
-join_multiple_lines = False
-split_before_first_argument = False
+based_on_style=pep8
+spaces_before_comment=4
+split_before_logical_operator=False
+column_limit=80
+allow_split_before_dict_value=False
+join_multiple_lines=False
+split_before_first_argument=False
 EOF
 printf '[ok]\n'
 
@@ -231,7 +231,7 @@ file="\$1"
 dir=\$(dirname "\$0")
 
 cd "\$dir"
-python3 -m unittest --verbose
+python3 -m unittest
 
 EOF
 
@@ -256,6 +256,15 @@ then
 fi
 printf '[ok]\n'
 
+printf 'running mypy on source...\n'
+find "\$proj" -name '*.py' | xargs -n1 -I{} bash -c "echo \" -> mypy {}\" && mypy {}"
+if [ "\$?" != "0" ];
+then
+    printf '[failed]\n'
+    exit 1
+fi
+printf '[ok]\n'
+
 printf 'running yapf on tests...\n'
 find "test" -name '*.py' | xargs -n1 -I{} bash -c "echo \" -> yapf {}\" && python3 -m yapf -i {}"
 if [ "\$?" != "0" ];
@@ -265,8 +274,8 @@ then
 fi
 printf '[ok]\n'
 
-printf 'running mypy on source...\n'
-find "\$proj" -name '*.py' | xargs -n1 -I{} bash -c "echo \" -> mypy {}\" && mypy {}"
+printf 'running mypy on tests...\n'
+find "test" -name '*.py' | xargs -n1 -I{} bash -c "echo \" -> mypy {}\" && mypy {}"
 if [ "\$?" != "0" ];
 then
     printf '[failed]\n'
@@ -326,6 +335,9 @@ dist/
 include/
 bin/
 lib/
+
+# IDEs
+.idea/
 
 EOF
     cd "$wdir"
