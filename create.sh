@@ -325,7 +325,8 @@ setup(
     package_data={'$proj': ['LICENSE.txt', 'py.typed']},
     packages=packages,
     install_requires=install_requires,
-    long_description=open('README').read())
+    long_description=open('README').read(),
+    zip_safe=False)
 
 EOF
     printf '[ok]\n'
