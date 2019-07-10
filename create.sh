@@ -60,6 +60,13 @@ wdir=""
 setup="0"
 usegit="0"
 
+test -n $(command -v python3) || err "Python 3 not installed or not in PATH"
+
+py_ver=$(python3 -c "import sys; x=sys.version_info; print(x.major*10 + x.minor)")
+if test "$py_ver" -lt 36; then
+    err "Python 3.6 is the minimum requirement"
+fi
+
 parse_args "$@"
 
 echo "using directory: $wdir"
@@ -131,12 +138,9 @@ printf 'creating test/test_import.py... '
 cat - > "$wdir/test/test_import.py" <<EOF
 # test_import.py
 
-import unittest
-
-class TestCase(unittest.TestCase):
-    def test_import(self):
-        """Verify package is importable."""
-        self.assertIsNotNone(__import__('$proj'))
+def test_import():
+    """Verify package is importable."""
+    assert __import__('$proj') is not None
 
 EOF
 
@@ -231,8 +235,10 @@ file="\$1"
 dir=\$(dirname "\$0")
 
 cd "\$dir"
-python3 -m unittest
 
+source .env/bin/activate
+python3 -m pytest
+deactivate
 EOF
 
 chmod u+x "$wdir/run-tests.sh"
@@ -246,6 +252,8 @@ dir=\$(dirname "\$0")
 proj=\$(basename \$(pwd))
 
 cd "\$dir"
+
+source .env/bin/activate
 
 printf 'running yapf on source...\n'
 find "\$proj" -name '*.py' | xargs -n1 -I{} bash -c "echo \" -> yapf {}\" && python3 -m yapf -i {}"
@@ -288,6 +296,7 @@ printf 'updating README... '
 python3 -c 'import $proj; help($proj)' > README
 printf '[ok]\n'
 
+deactivate
 EOF
 
 chmod u+x "$wdir/lint.sh"
@@ -307,12 +316,15 @@ packages.remove('test')
 
 print(f'Installing the following packages: {packages}')
 
+install_requires=[]
+
 setup(
     name='$proj',
     version='0.1.dev0',
     package_dir={'$proj': '$proj'},
     package_data={'$proj': ['LICENSE.txt', 'py.typed']},
     packages=packages,
+    install_requires=install_requires,
     long_description=open('README').read())
 
 EOF
@@ -332,9 +344,7 @@ MANIFEST
 dist/
 
 # virtualenv additions
-include/
-bin/
-lib/
+.env/
 
 # IDEs
 .idea/
@@ -348,10 +358,11 @@ EOF
         exit 1
     fi
     git add .
-    virtualenv . > /dev/null
-    source bin/activate
+    virtualenv .env > /dev/null
+    source .env/bin/activate
     pip install mypy > /dev/null
     pip install yapf > /dev/null
+    pip install pytest > /dev/null
     pip install setuptools > /dev/null
     pip freeze > requirements.txt
     git add requirements.txt
