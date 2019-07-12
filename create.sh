@@ -188,6 +188,8 @@ column_limit=80
 allow_split_before_dict_value=False
 join_multiple_lines=False
 split_before_first_argument=False
+split_before_named_assigns=True
+each_dict_entry_on_separate_line=True
 EOF
 printf '[ok]\n'
 
