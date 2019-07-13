@@ -239,6 +239,14 @@ bname=\$(basename \$file)
 tfile="\$(dirname \$file)/test_\${bname}"
 
 mkdir -p \$(dirname "test/\$tfile")
+# ensure __init__.py files everywhere
+for p in \$(dirname test/\$tfile | sed 's|/| |g'); do
+    cd \$p
+    test -e ./__init__.py || touch ./__init__.py
+done
+
+cd \$mycd
+
 cat - <<EOM > "test/\$tfile"
 """
 \$(echo \$tfile | sed 's|/|\.|g' | sed 's|\.py$||g')
