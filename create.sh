@@ -7,14 +7,13 @@ err() {
 
 show_help() {
     cat - > /dev/stdout <<EOF
-create.sh -d|--dir <dir> [-s|--use-setup] [-g|--git]
+create.sh -d|--dir <dir> [-s|--use-setup]
 
 Create a skeleton Python 3 project with static typing support
 
 OPTIONS
   -d|--dir        Specify directory to set up project in
   -s|--setup      Create a setup.py file
-  -g|--git        Set up a git repository
   -h|--help       Show this message
 
 EOF
@@ -39,10 +38,6 @@ parse_args() {
                 setup="1"
                 shift
                 ;;
-            -g|--git)
-                usegit="1"
-                shift
-                ;;
             *)
                 err "Unknown option '$1'"
                 ;;
@@ -58,7 +53,7 @@ parse_args() {
 
 wdir=""
 setup="0"
-usegit="0"
+usegit="1"
 
 test -n $(command -v python3) || err "Python 3 not installed or not in PATH"
 
@@ -89,7 +84,7 @@ set -e
 printf 'creating package __init__.py... '
 cat - > "$wdir/$proj/__init__.py" <<EOF
 """
-One-liner
+$proj
 
 Summary
 - - - -
@@ -122,21 +117,25 @@ fi
 
 printf 'creating test __init__.py... '
 cat - > "$wdir/test/__init__.py" <<EOF
-# __init__.py
+"""
+test
 
-#
-# $proj test
-#
-
+$proj tests package
+"""
 
 EOF
 
 printf '[ok]\n'
 
 
-printf 'creating test/test_import.py... '
-cat - > "$wdir/test/test_import.py" <<EOF
-# test_import.py
+printf "creating test/$proj/test_import.py... "
+mkdir -p "$wdir/test/$proj"
+cat - > "$wdir/test/$proj/test_import.py" <<EOF
+"""
+test.$proj.test_import
+
+Verify the package is importable.
+"""
 
 def test_import():
     """Verify package is importable."""
@@ -199,6 +198,7 @@ cat - <<EOF > "$wdir/create-file.sh"
 
 file="\$1"
 dir=\$(dirname "\$0")
+mkdir -p \$(dirname "\$file")
 
 relpath=\$(echo "\$file" | sed 's+\$dir++g')
 modname=\$(echo "\$relpath" | sed 's+/+.+g' | sed 's+\.py++g')
@@ -220,8 +220,37 @@ USAGE:
 
 """
 
-import typing
+from typing import Any
 
+
+EOM
+
+mycd=\$(pwd)
+
+# ensure __init__.py files everywhere
+for p in \$(dirname \$file | sed 's|/| |g'); do
+    cd \$p
+    test -e ./__init__.py || touch ./__init__.py
+done
+
+cd \$mycd
+
+bname=\$(basename \$file)
+tfile="\$(dirname \$file)/test_\${bname}"
+
+mkdir -p \$(dirname "test/\$tfile")
+cat - <<EOM > "test/\$tfile"
+"""
+\$(echo \$tfile | sed 's|/|\.|g' | sed 's|\.py$||g')
+
+Tests for '\$(echo \$file | sed 's|/|\.|g' | sed 's|\.py$||g')'.
+"""
+
+import \$(echo \$file | sed 's|/|\.|g' | sed 's|\.py$||g')
+
+
+def test_empty():
+    assert True
 
 EOM
 EOF

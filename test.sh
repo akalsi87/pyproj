@@ -12,9 +12,11 @@ trap "cleanup" INT TERM EXIT
 
 set -e
 
-./create.sh -d $TDIR -s -g
+./create.sh -d $TDIR -s
 
 cd $TDIR
+./create-file.sh $TDIR/foo.py
+./create-file.sh $TDIR/bar/baz.py
 ./lint.sh
 ./run-tests.sh
 cd ../
