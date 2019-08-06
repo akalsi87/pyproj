@@ -183,7 +183,7 @@ cat - <<EOF > "$wdir/.style.yapf"
 based_on_style=pep8
 spaces_before_comment=4
 split_before_logical_operator=False
-column_limit=80
+column_limit=79
 allow_split_before_dict_value=False
 join_multiple_lines=False
 split_before_first_argument=False
