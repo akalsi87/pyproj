@@ -86,24 +86,8 @@ cat - > "$wdir/$proj/__init__.py" <<EOF
 """
 $proj
 
-Summary
-- - - -
 
-A summary...
-
-
-Details
-- - - -
-
-Many more
-details follow
-here...
-
-Usage
-- - -
-
-Examples here..
-
+Init file for the '$proj' package.
 """
 EOF
 
@@ -120,7 +104,7 @@ cat - > "$wdir/test/__init__.py" <<EOF
 """
 test
 
-$proj tests package
+Test package for '$proj'.
 """
 
 EOF
@@ -207,20 +191,12 @@ cat - <<EOM > "\$file"
 """
 \$modname
 
-Description...
 
-FUNCTIONS:
-    a: something
-
-CLASSES:
-    b: something
-
-USAGE:
-    ...
-
+PURPOSE:
 """
 
 from typing import Any
+
 
 
 EOM
@@ -398,7 +374,7 @@ EOF
         exit 1
     fi
     git add .
-    virtualenv .env > /dev/null
+    python3 -m venv .env > /dev/null
     source .env/bin/activate
     pip install mypy > /dev/null
     pip install yapf > /dev/null

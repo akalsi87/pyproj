@@ -3,8 +3,8 @@
 Creates template Python 3.6 projects with `yapf` and `mypy`.
 
 ## Other features
- * initialized project with simeple docstrings and readme
- * intializes with an MIT license
+ * initialized project with simple docstrings and readme
+ * initializes with an MIT license
  * sets up helper scripts to format and create files
  * lays out the following directory structure:
 ```
@@ -32,13 +32,12 @@ foo/
 ```
 (14:14:16) | akalsi@archlinux | akalsi/code/pyproj (master)
 $ ./create.sh -h
-create.sh -d|--dir <dir> [-s|--use-setup] [-g|--git]
+create.sh -d|--dir <dir> [-s|--use-setup]
 
 Create a skelton Python 3 project
 
 OPTIONS
   -d|--dir        Specify directory to set up project in
   -s|--use-setup  Create a setup.py file
-  -g|--git        Set up a git repository
   -h|--help       Show this message
 ```
