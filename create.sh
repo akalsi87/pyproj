@@ -319,6 +319,13 @@ print(f'Installing the following packages: {packages}')
 
 install_requires=[]
 
+with open('requirements.txt') as f:
+    for line in f:
+        line = line.strip()
+        if line.startswith('#'):
+            continue
+        install_requires.append(line)
+
 setup(
     name='$proj',
     version='0.1.dev0',
@@ -342,16 +349,58 @@ cat - > "$wdir/.gitignore" <<EOF
 **/__pycache__
 **/*.pyc
 **/.mypy_cache
-MANIFEST
-dist/
+/MANIFEST
+/dist/
+/build/
+/${proj}.egginfo/
 
 # virtualenv additions
-.env/
+/.env/
 
 # IDEs
-.idea/
+/.idea/
 
 EOF
+
+  mkdir -p "$wdir/.github/workflows"
+cat - > "$wdir/.github/workflows/tests.yml" <<EOF
+name: CI
+
+on:
+  push:
+    branches:
+      - main
+      - develop
+  pull_request:
+    branches:
+      - main
+      - develop
+
+jobs:
+  build-linux-64:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+    - uses: actions/setup-python@v2
+      with:
+        python-version: '3.x'
+        architecture: 'x64'
+    - name: Env setup
+      run: |
+        cd \$GITHUB_WORKSPACE
+        python3 -m venv .env
+        source .env/bin/activate
+        python3 -m pip install -r requirements-dev.txt
+    - name: Lint, mypy
+      run: |
+        cd \$GITHUB_WORKSPACE
+        ./lint.sh
+    - name: Tests
+      run: |
+        cd \$GITHUB_WORKSPACE
+        ./run-tests.sh
+EOF
+
     cd "$wdir"
     git init . 2>&1 > /dev/null
     if [ "$?" != "0" ];
@@ -364,7 +413,7 @@ EOF
     source .env/bin/activate
     python3 -m pip install black mypy pytest setuptools > /dev/null
     echo "# Package production requirements" > requirements.txt
-    echo "# Package development requirements" >> requirements-dev.txt
+    echo "# Package development requirements" > requirements-dev.txt
     echo "-r requirements.txt" >> requirements-dev.txt
     python3 -m pip freeze >> requirements-dev.txt
     git add requirements*.txt
